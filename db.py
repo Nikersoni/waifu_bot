@@ -3,6 +3,7 @@ import sqlite3
 conn = sqlite3.connect("data/bot.db", check_same_thread=False)
 cursor = conn.cursor()
 
+
 def init_db():
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS users (
@@ -19,7 +20,9 @@ def init_db():
     CREATE TABLE IF NOT EXISTS inventory (
         user_id INTEGER,
         card_name TEXT,
-        count INTEGER DEFAULT 1
+        rarity TEXT,
+        count INTEGER DEFAULT 1,
+        PRIMARY KEY (user_id, card_name)
     )
     """)
 
