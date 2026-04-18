@@ -1,1 +1,6 @@
+import os
 
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+
+CARD_COOLDOWN = 86400   # 24h
+BONUS_COOLDOWN = 86400  # 24h
