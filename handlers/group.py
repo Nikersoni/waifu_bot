@@ -43,18 +43,4 @@ async def on_bot_added(msg: types.Message):
             )
 
 
-# 🎴 КНОПКА → ВЫЗОВ КОМАНДЫ КАРТА
-@router.callback_query(F.data == "get_card")
-async def get_card_callback(call: types.CallbackQuery):
 
-    # создаём пользователя
-    await ensure_user(call.message)
-
-    # 👉 вызываем ту же логику, что и команда "карта"
-    fake_msg = call.message
-    fake_msg.from_user = call.from_user
-    fake_msg.text = "карта"
-
-    await card(fake_msg)
-
-    await call.answer()
