@@ -1,20 +1,20 @@
 from aiogram import Router, F
 from aiogram.types import Message
-from db import cursor
+from db import pool
 
 router = Router()
 
 
-@router.message(F.text.in_(["инв", "инвентарь", "🎒 Инвентарь"]))
+@router.message(F.text.in_(["инв", "инвентарь"]))
 async def inv(msg: Message):
 
-    cursor.execute("""
-    SELECT card_name, rarity, count
-    FROM inventory
-    WHERE user_id=?
-    """, (msg.from_user.id,))
+    async with pool.acquire() as conn:
 
-    rows = cursor.fetchall()
+        rows = await conn.fetch("""
+            SELECT card_name, rarity, count
+            FROM inventory
+            WHERE user_id=$1
+        """, msg.from_user.id)
 
     if not rows:
         await msg.answer("Пусто")
@@ -23,6 +23,6 @@ async def inv(msg: Message):
     text = "🎒 Инвентарь\n\n"
 
     for r in rows:
-        text += f"{r[0]} x{r[2]}\n"
+        text += f"{r['card_name']} x{r['count']}\n"
 
     await msg.answer(text)
