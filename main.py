@@ -10,6 +10,7 @@ from handlers import (
     inventory,
     bonus,
     top,
+    market,
     help,
     institute
 )
