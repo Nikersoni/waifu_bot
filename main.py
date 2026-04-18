@@ -12,6 +12,7 @@ from handlers import (
     top,
     market,
     help,
+    group,
     institute
 )
 
@@ -25,6 +26,7 @@ async def main():
     dp = Dispatcher()
 
     # 📦 роутеры
+    dp.include_router(group.router)
     dp.include_router(start.router)
     dp.include_router(card.router)
     dp.include_router(profile.router)
