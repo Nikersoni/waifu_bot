@@ -4,11 +4,11 @@ def main_menu():
     return ReplyKeyboardMarkup(
         keyboard=[
             [
-                KeyboardButton(text="🎴 Карта"),
+                KeyboardButton(text="🎴 Карты"),
                 KeyboardButton(text="👤 Профиль")
             ],
             [
-                KeyboardButton(text="🎒 Инв"),
+                KeyboardButton(text="🎒 Инвентарь"),
                 KeyboardButton(text="🏪 Рынок")
             ],
             [
