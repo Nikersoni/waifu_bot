@@ -1,30 +1,25 @@
 from aiogram import Router, F
 from aiogram.types import Message
-from db import cursor
+from db import pool
 
 router = Router()
 
 
-@router.message(F.text.lower().in_(["топ", "/топ", "🏆 топ", "top"]))
+@router.message(F.text.in_(["топ"]))
 async def top(msg: Message):
 
-    cursor.execute("""
-    SELECT username, diamonds
-    FROM users
-    ORDER BY diamonds DESC
-    LIMIT 5
-    """)
+    async with pool.acquire() as conn:
 
-    rows = cursor.fetchall()
+        rows = await conn.fetch("""
+            SELECT username, diamonds
+            FROM users
+            ORDER BY diamonds DESC
+            LIMIT 5
+        """)
 
-    if not rows:
-        await msg.answer("🏆 ТОП пуст")
-        return
-
-    text = "🏆 ТОП игроков\n\n"
+    text = "🏆 ТОП\n\n"
 
     for i, r in enumerate(rows, 1):
-        name = r[0] if r[0] else "Unknown"
-        text += f"{i}. {name} — {r[1]} 💎\n"
+        text += f"{i}. {r['username']} - {r['diamonds']} 💎\n"
 
     await msg.answer(text)
