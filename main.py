@@ -30,6 +30,7 @@ async def main():
     dp.include_router(inventory.router)
     dp.include_router(bonus.router)
     dp.include_router(top.router)
+    dp.include_router(market.router)
     dp.include_router(help.router)
     dp.include_router(institute.router)
 
