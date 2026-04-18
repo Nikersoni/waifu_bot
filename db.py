@@ -3,24 +3,14 @@ from config import *
 
 pool = None
 
-async def connect():
+async def init_db():
     global pool
     pool = await asyncpg.create_pool(
-        user=DB_USER,
-        password=DB_PASS,
-        database=DB_NAME,
         host=DB_HOST,
-        port=DB_PORT
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASS
     )
 
-async def execute(query, *args):
-    async with pool.acquire() as conn:
-        return await conn.execute(query, *args)
-
-async def fetch(query, *args):
-    async with pool.acquire() as conn:
-        return await conn.fetch(query, *args)
-
-async def fetchrow(query, *args):
-    async with pool.acquire() as conn:
-        return await conn.fetchrow(query, *args)
+async def get_pool():
+    return pool
