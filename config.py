@@ -1,7 +1,6 @@
-BOT_TOKEN = "YOUR_BOT_TOKEN"
+BOT_TOKEN = "YOUR_TOKEN"
 
 DB_HOST = "localhost"
-DB_PORT = 5432
+DB_NAME = "waifu"
 DB_USER = "postgres"
 DB_PASS = "password"
-DB_NAME = "waifu_bot"
