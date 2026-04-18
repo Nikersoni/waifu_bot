@@ -16,7 +16,7 @@ async def init_db():
 
     async with pool.acquire() as conn:
 
-        # USERS TABLE
+        # 👤 USERS
         await conn.execute("""
         CREATE TABLE IF NOT EXISTS users (
             user_id BIGINT PRIMARY KEY,
@@ -38,7 +38,7 @@ async def init_db():
         );
         """)
 
-        # INVENTORY TABLE
+        # 🎴 INVENTORY
         await conn.execute("""
         CREATE TABLE IF NOT EXISTS inventory (
             user_id BIGINT,
@@ -49,13 +49,22 @@ async def init_db():
         );
         """)
 
+    print("✅ DB initialized")
 
+
+# 📦 ПОЛУЧЕНИЕ POOL (БЕЗОПАСНО)
 async def get_pool():
+    if pool is None:
+        raise RuntimeError("❌ DB not initialized. Call init_db() first.")
     return pool
 
 
-# 👤 СОЗДАНИЕ ИЛИ ОБНОВЛЕНИЕ ПОЛЬЗОВАТЕЛЯ (ФИКС ОШИБКИ)
+# 👤 СОЗДАНИЕ / ОБНОВЛЕНИЕ ПОЛЬЗОВАТЕЛЯ
 async def get_or_create_user(user_id: int, username: str):
+
+    if pool is None:
+        raise RuntimeError("❌ DB not initialized. Call init_db() first.")
+
     async with pool.acquire() as conn:
 
         await conn.execute("""
