@@ -1,34 +1,42 @@
 import random
 
 CARDS = [
-    ("Луна", "common"),
-    ("Мика", "common"),
-    ("Сора", "common"),
-    ("Рин", "common"),
-
-    ("Аой", "rare"),
-    ("Мэй", "rare"),
-
-    ("Ая", "epic"),
-    ("Хикари", "epic"),
-
-    ("Хината", "legend"),
-    ("Акари", "myth")
+    ("Хината", "rare"),
+    ("Аянами Рей", "legend"),
+    ("Асуна", "epic"),
+    ("Мику", "common"),
+    ("Zero Two", "epic"),
+    ("Rem", "rare"),
+    ("Emilia", "rare"),
+    ("Kurumi", "legend"),
+    ("Nezuko", "epic"),
+    ("Hinata", "common"),
 ]
 
+RARITY_CHANCE = {
+    "common": 50,
+    "rare": 30,
+    "epic": 12,
+    "legend": 6,
+    "myth": 2
+}
 
-def roll_card():
-    r = random.randint(1, 100)
+EMOJI = {
+    "common": "⚪",
+    "rare": "🟢",
+    "epic": "🔵",
+    "legend": "🟣",
+    "myth": "🟡"
+}
 
-    if r <= 50:
-        pool = [c for c in CARDS if c[1] == "common"]
-    elif r <= 80:
-        pool = [c for c in CARDS if c[1] == "rare"]
-    elif r <= 95:
-        pool = [c for c in CARDS if c[1] == "epic"]
-    elif r <= 99:
-        pool = [c for c in CARDS if c[1] == "legend"]
-    else:
-        pool = [c for c in CARDS if c[1] == "myth"]
+def get_random_card():
+    roll = random.randint(1, 100)
+    total = 0
 
-    return random.choice(pool)
+    for rarity, chance in RARITY_CHANCE.items():
+        total += chance
+        if roll <= total:
+            pool = [c for c in CARDS if c[1] == rarity]
+            return random.choice(pool)
+
+    return random.choice(CARDS)
