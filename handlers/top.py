@@ -4,15 +4,16 @@ from db import cursor
 
 router = Router()
 
-@router.message(F.text == "🏆 Топ")
+
+@router.message(F.text == "топ")
 async def top(msg: Message):
 
     cursor.execute("SELECT username, diamonds FROM users ORDER BY diamonds DESC LIMIT 5")
     rows = cursor.fetchall()
 
-    text = "🏆 ТОП АЛМАЗОВ\n\n"
+    text = "🏆 ТОП\n\n"
 
     for i, r in enumerate(rows, 1):
-        text += f"{i}. {r[0]} — {r[1]} 💎\n"
+        text += f"{i}. {r[0]} - {r[1]} 💎\n"
 
     await msg.answer(text)
