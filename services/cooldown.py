@@ -1,4 +1,6 @@
 import time
 
-def check_cd(last_time, cooldown):
-    return time.time() - last_time >= cooldown
+DAY = 86400
+
+def check_cd(last):
+    return time.time() - last >= DAY
