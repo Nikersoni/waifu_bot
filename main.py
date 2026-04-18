@@ -1,5 +1,8 @@
 import asyncio
+import logging
+
 from aiogram import Bot, Dispatcher
+
 from config import BOT_TOKEN
 from db import init_db
 
@@ -17,13 +20,21 @@ from handlers import (
 )
 
 
-async def main():
-    # 🗄️ сначала база данных
-    await init_db()
+# 📌 логирование
+logging.basicConfig(level=logging.INFO)
 
-    # 🤖 бот
+
+async def main():
+
+    # 🤖 бот создаём СРАЗУ
     bot = Bot(token=BOT_TOKEN)
     dp = Dispatcher()
+
+    # 🗄️ БД + pool
+    pool = await init_db()
+
+    # 💾 сохраняем pool в bot (ВАЖНО)
+    bot["db_pool"] = pool
 
     # 📦 роутеры
     dp.include_router(group.router)
@@ -37,8 +48,9 @@ async def main():
     dp.include_router(help.router)
     dp.include_router(institute.router)
 
-    print("✅ Bot started")
+    print("🚀 BOT STARTED")
 
+    # 🤖 запуск
     await dp.start_polling(bot)
 
 
