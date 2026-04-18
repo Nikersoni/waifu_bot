@@ -1,28 +1,36 @@
 from aiogram import Router, F
 from aiogram.types import Message
-from db import get_user, update_user_time, cursor, conn
+import time
+
+from db import pool
 from services.economy import bonus_amount
 from services.cooldown import check_cd
-import time
+from config import BONUS_COOLDOWN
 
 router = Router()
 
 
-@router.message(F.text.in_(["бонус", "🎁 Бонус"]))
+@router.message(F.text.in_(["бонус"]))
 async def bonus(msg: Message):
 
-    user = get_user(msg.from_user.id)
+    async with pool.acquire() as conn:
 
-    if not check_cd(user[5], 86400):
-        await msg.answer("⏳ КД бонус")
-        return
+        user = await conn.fetchrow(
+            "SELECT * FROM users WHERE user_id=$1",
+            msg.from_user.id
+        )
 
-    amount = bonus_amount()
+        if not check_cd(user["last_bonus"], BONUS_COOLDOWN):
+            await msg.answer("⏳ КД бонус")
+            return
 
-    cursor.execute("UPDATE users SET diamonds=diamonds+? WHERE user_id=?",
-                   (amount, msg.from_user.id))
-    conn.commit()
+        amount = bonus_amount()
 
-    update_user_time(msg.from_user.id, "last_bonus", int(time.time()))
+        await conn.execute("""
+            UPDATE users
+            SET diamonds = diamonds + $1,
+                last_bonus = $2
+            WHERE user_id = $3
+        """, amount, int(time.time()), msg.from_user.id)
 
     await msg.answer(f"🎁 +{amount} 💎")
