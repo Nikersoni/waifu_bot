@@ -3,14 +3,27 @@ from aiogram import Bot, Dispatcher
 from config import BOT_TOKEN
 from db import init_db
 
-from handlers import start, card, profile, inventory, bonus, top, help, institute
+from handlers import (
+    start,
+    card,
+    profile,
+    inventory,
+    bonus,
+    top,
+    help,
+    institute
+)
+
 
 async def main():
+    # 🗄️ сначала база данных
     await init_db()
 
+    # 🤖 бот
     bot = Bot(token=BOT_TOKEN)
     dp = Dispatcher()
 
+    # 📦 роутеры
     dp.include_router(start.router)
     dp.include_router(card.router)
     dp.include_router(profile.router)
@@ -20,7 +33,10 @@ async def main():
     dp.include_router(help.router)
     dp.include_router(institute.router)
 
+    print("✅ Bot started")
+
     await dp.start_polling(bot)
+
 
 if __name__ == "__main__":
     asyncio.run(main())
