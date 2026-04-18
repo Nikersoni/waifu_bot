@@ -1,7 +1,7 @@
 from aiogram import Router, types, F
 
 from services.user import ensure_user
-from handlers.card import card
+from services.cards import give_card
 
 router = Router()
 
@@ -25,13 +25,13 @@ async def on_bot_added(msg: types.Message):
                 "инв — инвентарь\n"
                 "бонус — ежедневная награда\n"
                 "топ — рейтинг игроков\n"
-                "рынок — торговля (скоро)\n"
+                "рынок — торговля\n"
                 "хелп — помощь\n\n"
                 "🔥 Просто пиши команды в чат"
             )
 
 
-# 🎴 обычные сообщения в группе → обрабатываем как ЛС
+# 💬 ОБРАБОТКА КОМАНД В ГРУППЕ (REPLY MODE)
 @router.message(lambda m: m.chat.type in ["group", "supergroup"])
 async def group_router(msg: types.Message):
 
@@ -40,29 +40,54 @@ async def group_router(msg: types.Message):
 
     text = msg.text.lower().strip()
 
-    # 👤 регистрируем пользователя
+    # 👤 регистрируем пользователя всегда
     await ensure_user(msg)
 
-    # 🎴 карта
+    # 🎴 КАРТА
     if text in ["карта", "🎴 карта"]:
-        await card(msg)
+        result = await give_card(msg.from_user.id)
 
-    # дальше можно добавлять аналогично:
+        await msg.answer(
+            result,
+            reply_to_message_id=msg.message_id
+        )
+
+    # 👤 ПРОФИЛЬ
     elif text in ["профиль", "👤 профиль"]:
-        await msg.answer("👤 Профиль игрока")
+        await msg.answer(
+            "👤 Профиль игрока",
+            reply_to_message_id=msg.message_id
+        )
 
+    # 🎒 ИНВЕНТАРЬ
     elif text in ["инв", "инвентарь", "🎒 инв"]:
-        await msg.answer("🎒 Инвентарь")
+        await msg.answer(
+            "🎒 Инвентарь",
+            reply_to_message_id=msg.message_id
+        )
 
+    # 🎁 БОНУС
     elif text in ["бонус", "🎁 бонус"]:
-        await msg.answer("🎁 Бонус получен")
+        await msg.answer(
+            "🎁 Ежедневная награда получена",
+            reply_to_message_id=msg.message_id
+        )
 
+    # 🏆 ТОП
     elif text in ["топ", "🏆 топ"]:
-        await msg.answer("🏆 Топ игроков")
+        await msg.answer(
+            "🏆 Топ игроков",
+            reply_to_message_id=msg.message_id
+        )
 
+    # 🏪 РЫНОК
     elif text in ["рынок", "🏪 рынок"]:
-        await msg.answer("🏪 Рынок в разработке")
+        await msg.answer(
+            "🏪 Рынок в разработке",
+            reply_to_message_id=msg.message_id
+        )
 
+    # ❓ ХЕЛП
     elif text in ["хелп", "help", "❓ хелп"]:
         await msg.answer(
             "📖 Команды:\n"
@@ -71,5 +96,6 @@ async def group_router(msg: types.Message):
             "инв\n"
             "бонус\n"
             "топ\n"
-            "рынок"
+            "рынок",
+            reply_to_message_id=msg.message_id
         )
