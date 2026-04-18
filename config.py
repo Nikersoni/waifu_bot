@@ -1,6 +1,7 @@
-import os
+BOT_TOKEN = "YOUR_BOT_TOKEN"
 
-BOT_TOKEN = os.getenv("BOT_TOKEN")
-
-CARD_COOLDOWN = 86400   # 24h
-BONUS_COOLDOWN = 86400  # 24h
+DB_HOST = "localhost"
+DB_PORT = 5432
+DB_USER = "postgres"
+DB_PASS = "password"
+DB_NAME = "waifu_bot"
