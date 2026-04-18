@@ -2,7 +2,7 @@ from aiogram import Router, F
 from aiogram.types import Message
 import time
 
-from db import cursor, conn, get_user, create_user, update_user_time
+from db import pool
 from services.cards import roll_card
 from services.cooldown import check_cd
 from config import CARD_COOLDOWN
@@ -17,57 +17,53 @@ RARITY_EMOJI = {
     "myth": "🟡"
 }
 
-RARITY_NAME = {
-    "common": "Обычная",
-    "rare": "Редкая",
-    "epic": "Эпическая",
-    "legend": "Легендарная",
-    "myth": "Мифическая"
-}
 
-
-@router.message(F.text.in_(["карта", "🎴 Карта"]))
+@router.message(F.text.in_(["карта", "🎴 карта"]))
 async def card(msg: Message):
 
-    user = get_user(msg.from_user.id)
+    async with pool.acquire() as conn:
 
-    if not user:
-        create_user(msg.from_user.id, msg.from_user.username)
-        user = get_user(msg.from_user.id)
+        user = await conn.fetchrow(
+            "SELECT * FROM users WHERE user_id=$1",
+            msg.from_user.id
+        )
 
-    # ⏳ КД
-    if not check_cd(user[4], CARD_COOLDOWN):
-        await msg.answer("⏳ Карточка доступна раз в 24 часа")
-        return
+        if not user:
+            await conn.execute("""
+                INSERT INTO users (user_id, username)
+                VALUES ($1,$2)
+            """, msg.from_user.id, msg.from_user.username)
 
-    # 🎴 выпадение
-    card_name, rarity = roll_card()
+            user = await conn.fetchrow(
+                "SELECT * FROM users WHERE user_id=$1",
+                msg.from_user.id
+            )
 
-    # 📦 в инвентарь
-    cursor.execute("""
-    INSERT INTO inventory (user_id, card_name, rarity, count)
-    VALUES (?,?,?,1)
-    ON CONFLICT(user_id, card_name)
-    DO UPDATE SET count = count + 1
-    """, (msg.from_user.id, card_name, rarity))
+        if not check_cd(user["last_card"], CARD_COOLDOWN):
+            await msg.answer("⏳ КД 24 часа")
+            return
 
-    # 💍 делаем активной вайфу
-    cursor.execute("""
-    UPDATE users
-    SET active_name=?,
-        active_rarity=?,
-        active_level=1,
-        active_hp=100
-    WHERE user_id=?
-    """, (card_name, rarity, msg.from_user.id))
+        card_name, rarity = roll_card()
 
-    conn.commit()
+        await conn.execute("""
+            INSERT INTO inventory (user_id, card_name, rarity, count)
+            VALUES ($1,$2,$3,1)
+            ON CONFLICT(user_id, card_name)
+            DO UPDATE SET count = inventory.count + 1
+        """, msg.from_user.id, card_name, rarity)
 
-    update_user_time(msg.from_user.id, "last_card", int(time.time()))
+        await conn.execute("""
+            UPDATE users
+            SET active_name=$1,
+                active_rarity=$2,
+                active_level=1,
+                active_hp=100,
+                last_card=$3
+            WHERE user_id=$4
+        """, card_name, rarity, int(time.time()), msg.from_user.id)
 
-    # ✨ вывод
     await msg.answer(
 f"""✨ ТЕБЕ ВЫПАЛА ВАЙФУ!
 
-{RARITY_EMOJI[rarity]} {card_name}  [{RARITY_NAME[rarity]}]"""
+{RARITY_EMOJI[rarity]} {card_name}"""
     )
