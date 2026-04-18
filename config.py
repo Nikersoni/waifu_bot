@@ -1,4 +1,4 @@
-BOT_TOKEN = "YOUR_TOKEN"
+BOT_TOKEN = "8648276698:AAEPegOqD3pThyls1Qx5A3TkIQAH90AMtoA"
 
 DB_HOST = "localhost"
 DB_NAME = "waifu"
