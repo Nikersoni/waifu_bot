@@ -26,6 +26,7 @@ async def get_pool():
 async def create_tables():
     async with pool.acquire() as conn:
 
+        # USERS TABLE
         await conn.execute("""
         CREATE TABLE IF NOT EXISTS users (
             user_id BIGINT PRIMARY KEY,
@@ -47,6 +48,7 @@ async def create_tables():
         );
         """)
 
+        # INVENTORY TABLE
         await conn.execute("""
         CREATE TABLE IF NOT EXISTS inventory (
             user_id BIGINT,
@@ -57,3 +59,19 @@ async def create_tables():
             PRIMARY KEY (user_id, card_name)
         );
         """)
+
+
+# 👤 АВТО-СОЗДАНИЕ ПОЛЬЗОВАТЕЛЯ
+async def get_or_create_user(user_id: int, username: str):
+    async with pool.acquire() as conn:
+
+        user = await conn.fetchrow(
+            "SELECT * FROM users WHERE user_id = $1",
+            user_id
+        )
+
+        if not user:
+            await conn.execute("""
+                INSERT INTO users (user_id, username)
+                VALUES ($1, $2)
+            """, user_id, username)
