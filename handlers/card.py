@@ -1,4 +1,4 @@
-from aiogram import Router, F
+from aiogram import Router
 from aiogram.types import Message
 import time
 
@@ -18,8 +18,13 @@ RARITY_EMOJI = {
 }
 
 
-@router.message(F.text.in_(["карта", "🎴 карта"]))
+@router.message(F.text)
 async def card(msg: Message):
+
+    text = (msg.text or "").lower().strip()
+
+    if text not in ["карта", "🎴 карта", "/карта"]:
+        return
 
     async with pool.acquire() as conn:
 
